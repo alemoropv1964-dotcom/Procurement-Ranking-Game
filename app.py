@@ -1,5 +1,7 @@
 import streamlit as st
 import random
+import matplotlib.pyplot as plt
+import numpy as np
 
 # ---------------------------------------------------------
 # TITOLO E INTRODUZIONE
@@ -117,7 +119,9 @@ for i in range(4):
 st.header("🚀 Esegui Simulazione")
 
 if st.button("Simula"):
-    st.subheader("📊 Risultati")
+    risultati_radar = []
+
+st.subheader("📊 Risultati")
 
     for i, quantita in enumerate(ordini):
         st.write(f"### 🔹 Ordine {i+1}: {quantita} unità")
@@ -152,12 +156,69 @@ if st.button("Simula"):
                 continue
 
             # Se tutto OK → assegnazione
-            costo_totale = quantita * f["costo"]
-            st.success(
-                f"Ordine assegnato a **F{corrente+1}** "
-                f"(Costo totale: {costo_totale}, LT: {f['lead_time']})"
-            )
+            c# Se tutto OK → calcolo penalità
+costo_totale = quantita * f["costo"]
+pen = penalita(f["lead_time"], costo_totale, peso_lt, peso_costo)
+
+st.success(
+    f"Ordine assegnato a **F{corrente+1}** "
+    f"(Costo totale: {costo_totale}, LT: {f['lead_time']}, Penalità: {pen:.2f})"
+)
+
+# Salva per grafico radar
+risultati_radar.append({
+    "ordine": i+1,
+    "fornitore": f"F{corrente+1}",
+    "costo": costo_totale,
+    "lead_time": f["lead_time"],
+    "penalita": pen
+})
+
+break
+
             break
 
         if tentativi == 4:
             st.error("❌ Nessun fornitore disponibile per questo ordine.")
+# ---------------------------------------------------------
+# GRAFICO RADAR
+# ---------------------------------------------------------
+st.header("📈 Grafico Radar – Confronto Fornitori Vincitori")
+
+if len(risultati_radar) > 0:
+
+    # Normalizzazione per rendere i valori confrontabili
+    costi = np.array([r["costo"] for r in risultati_radar])
+    lts = np.array([r["lead_time"] for r in risultati_radar])
+    pens = np.array([r["penalita"] for r in risultati_radar])
+
+    # Evita divisioni per zero
+    costi_norm = costi / costi.max() if costi.max() > 0 else costi
+    lts_norm = lts / lts.max() if lts.max() > 0 else lts
+    pens_norm = pens / pens.max() if pens.max() > 0 else pens
+
+    labels = ["Costo", "Lead Time", "Penalità"]
+    num_vars = len(labels)
+
+    fig = plt.figure(figsize=(6, 6))
+    ax = fig.add_subplot(111, polar=True)
+
+    for idx, r in enumerate(risultati_radar):
+        valori = [costi_norm[idx], lts_norm[idx], pens_norm[idx]]
+        valori += valori[:1]  # chiusura del grafico
+
+        angoli = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+        angoli += angoli[:1]
+
+        ax.plot(angoli, valori, label=f"Ordine {r['ordine']} – {r['fornitore']}")
+        ax.fill(angoli, valori, alpha=0.1)
+
+    ax.set_xticks(angoli[:-1])
+    ax.set_xticklabels(labels)
+    ax.set_title("Confronto tra i fornitori vincitori (valori normalizzati)")
+    ax.legend(loc="upper right", bbox_to_anchor=(1.3, 1.1))
+
+    st.pyplot(fig)
+
+else:
+    st.info("Nessun ordine assegnato, impossibile generare il grafico radar.")
