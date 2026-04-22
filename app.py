@@ -176,10 +176,6 @@ risultati_radar.append({
 
 break
 
-            break
-
-        if tentativi == 4:
-            st.error("❌ Nessun fornitore disponibile per questo ordine.")
 # ---------------------------------------------------------
 # GRAFICO RADAR
 # ---------------------------------------------------------
@@ -222,3 +218,8 @@ if len(risultati_radar) > 0:
 
 else:
     st.info("Nessun ordine assegnato, impossibile generare il grafico radar.")
+
+            break
+
+        if tentativi == 4:
+            st.error("❌ Nessun fornitore disponibile per questo ordine.")
