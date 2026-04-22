@@ -20,6 +20,18 @@ Modifica i parametri e premi **Simula** per vedere i risultati.
 
 
 # ---------------------------------------------------------
+# VISUALIZZAZIONE GRAFICA DEL CICLO
+# ---------------------------------------------------------
+st.header("🔁 Visualizzazione del ciclo Mod 4")
+
+st.code("""
+F1 → F2 → F3 → F4 → F1
+""", language="text")
+
+st.write("Il ciclo rappresenta l'ordine dei fallback: se un fornitore fallisce, si passa al successivo nel ciclo.")
+
+
+# ---------------------------------------------------------
 # PARAMETRI FORNITORI
 # ---------------------------------------------------------
 st.header("📦 Parametri dei 4 Fornitori")
@@ -77,6 +89,26 @@ lead_time_max = st.number_input("Lead Time massimo accettabile", 1, 60, 10)
 # ---------------------------------------------------------
 def ciclo_mod4(i):
     return (i + 1) % 4
+
+
+# ---------------------------------------------------------
+# SEZIONE FALLBACK PER OGNI ORDINE
+# ---------------------------------------------------------
+st.header("📌 Logica dei fallback per ogni ordine")
+
+for i in range(4):
+    primario = i
+    fb1 = ciclo_mod4(primario)
+    fb2 = ciclo_mod4(fb1)
+    fb3 = ciclo_mod4(fb2)
+
+    st.write(f"""
+### Ordine {i+1}
+- **Fornitore primario:** F{primario+1}
+- **Fallback 1:** F{fb1+1}
+- **Fallback 2:** F{fb2+1}
+- **Fallback 3:** F{fb3+1}
+""")
 
 
 # ---------------------------------------------------------
